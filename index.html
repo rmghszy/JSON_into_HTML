@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Homework 4</title>
+</head>
+<body>
+    <div style="text-align: center"> 
+        <h2>Enter URL for largest manufacturers by production (2017) List JSON File</h2>
+        <form name="myform" method="POST">
+            <input type="text" name="URL" size = 35>
+            <br>
+            <br>
+            <input style="background-color:lightgray;" type="button" value="Submit Query" onclick="viewJSON(this.form)">
+        </form>
+    </div>
+    
+    <script type="text/javascript">
+        function viewJSON(what) {
+            var URL = what.URL.value;
+            function loadJSON(url) {
+                var req = new XMLHttpRequest();
+                try {
+                    req.open("GET", url, false);
+                    req.send();
+                }
+                catch(err) {
+                    console.log(err);
+                }
+                if (req.status != 200) {
+                    alert("Error: JSON file does not exist");
+                    return;
+                }
+                jsonObj = JSON.parse(req.responseText);
+                return jsonObj;
+            }
+            jsonObj = loadJSON(URL);
+            if (!jsonObj.Mainline.Table.hasOwnProperty("Row") || jsonObj.Mainline.Table.Row == null || jsonObj.Mainline.Table.Row.length == 0) {
+                alert("Error: JSON file containing NO car manufacturers");
+                return;
+            }
+            console.log(jsonObj);
+            jsonObj.onload = generateHTML(jsonObj);
+            hWin = window.open("", "Assignment4", height = 800, width = 600);
+            hWin.document.write(html_text);
+            hWin.document.close();
+        }
+         function generateHTML(jsonObj) {
+            root = jsonObj.DocumentElement;
+            html_text = "<html><head><title>Largest Manufacturers by Production (2017)</title></head><body>";
+            html_text += "<table border='2'>";
+            headers = jsonObj.Mainline.Table.Header.Data;
+            html_text += "<tbody>";
+            html_text += "<tr>";  
+            for (var i = 0; i < headers.length; i++) {
+                html_text += "<th>" + headers[i] + "</th>";
+            }
+            html_text += "</tr>";
+            cars = jsonObj.Mainline.Table.Row;
+            for (var i = 0; i < cars.length; i++) {
+                carNodeList = cars[i];
+                if (carNodeList == null || carNodeList.length == 0){
+                    continue;
+                }
+                html_text += "<tr>";
+                if (carNodeList["Rank"] == null) {
+                    html_text += "<td></td>";
+                }else {
+                    html_text += "<td>" + carNodeList["Rank"] + "</td>";
+                }
+                if (carNodeList["Group"] == null) {
+                    html_text += "<td></td>";
+                }else {
+                    html_text += "<td>" + carNodeList["Group"] + "</td>";
+                }
+                if (carNodeList["Hubs"].Hub == null || carNodeList["Hubs"].Hub.length == 0) {
+                    html_text += "<td></td>";
+                }else {
+                    html_text += "<td><ul>";
+                    var firstItem = true;
+                    for (var k = 0; k < carNodeList["Hubs"].Hub.length; k++) {
+                        if (carNodeList["Hubs"].Hub[k] != null && carNodeList["Hubs"].Hub[k].length != 0) {
+                            if (firstItem == true) {
+                                html_text += "<li style= 'font-weight: bold;'>" + carNodeList["Hubs"].Hub[k] + "</li>";
+                                firstItem = false;
+                            }else {
+                                html_text += "<li>" + carNodeList["Hubs"].Hub[k] + "</li>";
+                            }
+                        }
+                    }
+                    html_text += "</ul></td>";
+                }
+                if (carNodeList["Vehicles"] == null) {
+                    html_text += "<td></td>";
+                }else {
+                    html_text += "<td>" + carNodeList["Vehicles"] + "</td>";
+                }
+                if (carNodeList["HomePage"] == null) {
+                    html_text += "<td></td>";
+                }else {
+                    html_text += "<td><a href="+ carNodeList["HomePage"] + ">" + carNodeList["HomePage"] + "</a></td>";
+                }
+                if (carNodeList["Logo"] == null) {
+                    html_text += "<td width='150' height='150'></td>";
+                }else {
+                    html_text += "<td><img src= "+ carNodeList["Logo"] + " width='150' height='150'></td>";
+                }
+                html_text += "</tr>";  
+            }
+            html_text += "</tbody>";
+            html_text += "</table>";
+            html_text += "</bo" + "dy></html>";
+        }      
+    </script>
+</body>
+</html>
